@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ระบบหลังบ้าน | รพ.สต.นายาง</title>
+  <script src="cms-config.js"></script>
+  <style>
+    :root{--primary:#0b74d1;--green:#06c755;--danger:#dc2626;--warn:#f59e0b;--bg:#eef8ff;--text:#111827;--muted:#6b7280;--border:#dbe4ee;--white:#fff;--radius:18px;--shadow:0 10px 28px rgba(0,0,0,.10)}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,"Segoe UI",sans-serif;background:linear-gradient(180deg,#fff,#eaf6ff);color:var(--text)}
+    header{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+    .wrap{width:min(1180px,calc(100% - 28px));margin:auto}
+    .bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0}
+    .brand{display:flex;align-items:center;gap:12px}.brand img{width:52px;height:52px;border-radius:50%;object-fit:cover}.brand h1{margin:0;font-size:1.1rem}.brand p{margin:2px 0 0;color:var(--muted);font-size:.85rem}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}
+    button,.btn{border:0;border-radius:13px;padding:10px 14px;font-weight:800;cursor:pointer;box-shadow:var(--shadow);background:white;color:#0b4f92}
+    button.primary,.btn.primary{background:var(--primary);color:white}.success{background:var(--green)!important;color:white}.danger{background:var(--danger)!important;color:white}.warn{background:var(--warn)!important;color:white}.ghost{background:white;color:#0b4f92}
+    .card{background:white;border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:18px}
+    input,select,textarea{width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:13px;font:inherit;background:white}
+    textarea{min-height:110px;resize:vertical}
+    label{font-weight:800;font-size:.92rem}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+    .full{grid-column:1/-1}.login{min-height:80vh;display:grid;place-items:center}.login .card{width:min(460px,100%)}
+    .hidden{display:none!important}.drop{border:2px dashed #93c5fd;border-radius:18px;padding:22px;text-align:center;background:#f8fbff}
+    .preview{max-width:220px;border-radius:14px;margin-top:10px;display:none}
+    table{width:100%;border-collapse:collapse;font-size:.92rem}th,td{border-bottom:1px solid var(--border);padding:10px;vertical-align:top;text-align:left}th{background:#f1f7ff}td img{width:86px;height:58px;object-fit:cover;border-radius:10px}
+    .actions{display:flex;gap:6px;flex-wrap:wrap}.pill{display:inline-block;padding:4px 8px;border-radius:999px;font-size:.8rem;background:#eaf6ff;color:#07569b;font-weight:800}.pill.hidden-status{background:#fee2e2;color:#991b1b}
+    .notice{padding:10px 12px;border-radius:12px;background:#ecfdf5;color:#065f46;margin:10px 0}.error{background:#fef2f2;color:#991b1b}
+    @media(max-width:760px){.grid,.grid3{grid-template-columns:1fr}.bar{align-items:flex-start}.brand h1{font-size:1rem}table{font-size:.8rem}}
+  </style>
+</head>
+<body>
+<section id="loginPage" class="login">
+  <div class="card">
+    <div class="brand">
+      <img src="Logo.jpg" onerror="this.style.display='none'">
+      <div><h1>ระบบหลังบ้าน รพ.สต.นายาง</h1><p>เพิ่ม/แก้ไข/ลบ/ซ่อน ข่าว ประกาศ กิจกรรม เอกสาร</p></div>
+    </div>
+    <p id="apiStatus" style="color:#6b7280"></p>
+    <label>รหัสผ่านเจ้าหน้าที่</label>
+    <input id="password" type="password" placeholder="ใส่รหัสผ่านที่ตั้งไว้ใน Code.gs" onkeydown="if(event.key==='Enter')login()">
+    <br><br>
+    <button class="primary" onclick="login()">เข้าสู่ระบบ</button>
+  </div>
+</section>
+
+<section id="app" class="hidden">
+<header>
+  <div class="wrap bar">
+    <div class="brand">
+      <img src="Logo.jpg" onerror="this.style.display='none'">
+      <div><h1>ระบบหลังบ้าน รพ.สต.นายาง</h1><p>V10 Admin Full Control CMS</p></div>
+    </div>
+    <div class="actions">
+      <a class="btn ghost" href="index.html" target="_blank">เปิดหน้าเว็บ</a>
+      <button class="warn" onclick="loadAdminData()">รีเฟรชข้อมูล</button>
+      <button class="danger" onclick="logout()">ออกจากระบบ</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="tabs">
+    <button class="primary" onclick="showTab('news')">ข่าวสาร</button>
+    <button onclick="showTab('notice')">ประกาศ</button>
+    <button onclick="showTab('gallery')">กิจกรรม/รูปภาพ</button>
+    <button onclick="showTab('download')">เอกสาร PDF</button>
+    <button onclick="showTab('staff')">บุคลากร</button>
+    <button onclick="showTab('services')">บริการ</button>
+    <button onclick="showTab('service_schedule')">ตารางบริการ</button>
+  </div>
+  <div id="msg"></div>
+
+  <section id="formCard" class="card">
+    <h2 id="formTitle">เพิ่มข้อมูล</h2>
+    <input type="hidden" id="editId">
+    <input type="hidden" id="currentSheet" value="news">
+    <div id="dynamicForm" class="grid"></div>
+    <div class="full drop" id="dropZone">
+      <b>ลากวางรูป/PDF ที่นี่ หรือกดเลือกไฟล์</b><br>
+      <small>ระบบจะอัปโหลดไป Google Drive และนำลิงก์มาใส่ช่องให้อัตโนมัติ</small><br><br>
+      <input type="file" id="fileInput" onchange="uploadSelectedFile()">
+      <img id="filePreview" class="preview">
+      <div id="uploadResult"></div>
+    </div>
+    <br>
+    <div class="actions">
+      <button class="success" onclick="saveItem()">บันทึก/เผยแพร่</button>
+      <button class="ghost" onclick="clearForm()">ล้างฟอร์ม</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2 id="listTitle">รายการ</h2>
+    <div id="listArea">กำลังโหลด...</div>
+  </section>
+</main>
+</section>
+
+<script>
+let TOKEN = localStorage.getItem('NAYANG_ADMIN_TOKEN') || '';
+let CURRENT = 'news';
+let ADMIN_DATA = {};
+const API = (window.NAYANG_CMS && window.NAYANG_CMS.WEB_APP_URL) ? window.NAYANG_CMS.WEB_APP_URL : '';
+
+const SCHEMAS = {
+  news: [
+    ['date','วันที่','date'], ['title','หัวข้อข่าว','text'], ['description','รายละเอียด','textarea'], ['image_url','ลิงก์รูปภาพ','text']
+  ],
+  notice: [
+    ['date','วันที่','date'], ['title','หัวข้อประกาศ','text'], ['description','รายละเอียด','textarea']
+  ],
+  gallery: [
+    ['date','วันที่','date'], ['title','ชื่อกิจกรรม','text'], ['description','รายละเอียด','textarea'], ['image_url','ลิงก์รูปภาพ','text']
+  ],
+  download: [
+    ['title','ชื่อเอกสาร','text'], ['description','รายละเอียด','textarea'], ['file_url','ลิงก์ไฟล์ PDF/Word','text']
+  ],
+  staff: [
+    ['name','ชื่อ-สกุล','text'], ['position','ตำแหน่ง','text'], ['phone','เบอร์โทร','text'], ['image_url','ลิงก์รูปภาพ','text']
+  ],
+  services: [
+    ['icon','ไอคอน เช่น 🩺','text'], ['title','ชื่อบริการ','text'], ['description','รายละเอียด','textarea'], ['link','ลิงก์ปุ่ม','text']
+  ],
+  service_schedule: [
+    ['day','วัน','text'], ['service','รายการบริการ','textarea']
+  ]
+};
+
+function apiStatus(){
+  document.getElementById('apiStatus').textContent = API ? 'เชื่อมต่อ API: พร้อมใช้งาน' : 'ยังไม่พบ WEB_APP_URL ใน cms-config.js';
+}
+apiStatus();
+
+async function post(action, data={}){
+  if(!API) throw new Error('ยังไม่ได้ตั้งค่า WEB_APP_URL ใน cms-config.js');
+  const res = await fetch(API, {method:'POST', body: JSON.stringify({action, token:TOKEN, ...data})});
+  const json = await res.json();
+  if(!json.ok) throw new Error(json.message || 'เกิดข้อผิดพลาด');
+  return json;
+}
+
+async function login(){
+  try{
+    const password = document.getElementById('password').value.trim();
+    const res = await fetch(API, {method:'POST', body: JSON.stringify({action:'login', password})});
+    const json = await res.json();
+    if(!json.ok) throw new Error(json.message || 'เข้าสู่ระบบไม่สำเร็จ');
+    TOKEN = json.token;
+    localStorage.setItem('NAYANG_ADMIN_TOKEN', TOKEN);
+    document.getElementById('loginPage').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+    showTab('news');
+    await loadAdminData();
+  }catch(e){ alert(e.message); }
+}
+
+function logout(){
+  localStorage.removeItem('NAYANG_ADMIN_TOKEN');
+  TOKEN='';
+  location.reload();
+}
+
+function msg(text, error=false){
+  document.getElementById('msg').innerHTML = `<div class="notice ${error?'error':''}">${text}</div>`;
+  setTimeout(()=>document.getElementById('msg').innerHTML='',3500);
+}
+
+function showTab(sheet){
+  CURRENT = sheet;
+  document.getElementById('currentSheet').value = sheet;
+  document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('primary'));
+  [...document.querySelectorAll('.tabs button')].find(b=>b.getAttribute('onclick')?.includes(sheet))?.classList.add('primary');
+  renderForm();
+  renderList();
+}
+
+function renderForm(item={}){
+  document.getElementById('formTitle').textContent = item.id ? 'แก้ไขข้อมูล' : 'เพิ่มข้อมูล';
+  document.getElementById('editId').value = item.id || '';
+  const schema = SCHEMAS[CURRENT];
+  document.getElementById('dynamicForm').innerHTML = schema.map(([key,label,type])=>{
+    const value = item[key] || '';
+    if(type==='textarea') return `<div class="full"><label>${label}</label><textarea id="f_${key}">${escapeHtml(value)}</textarea></div>`;
+    return `<div><label>${label}</label><input id="f_${key}" type="${type}" value="${escapeAttr(value)}"></div>`;
+  }).join('') + `<div><label>สถานะ</label><select id="f_status"><option value="published">เผยแพร่</option><option value="hidden">ซ่อน</option></select></div>`;
+  if(item.status) document.getElementById('f_status').value = item.status;
+}
+
+function clearForm(){ renderForm(); document.getElementById('uploadResult').innerHTML=''; document.getElementById('filePreview').style.display='none'; }
+
+async function saveItem(){
+  try{
+    const schema = SCHEMAS[CURRENT];
+    const row = {};
+    schema.forEach(([key])=> row[key] = document.getElementById('f_'+key).value.trim());
+    row.status = document.getElementById('f_status').value;
+    const id = document.getElementById('editId').value;
+    if(id) await post('update', {sheet:CURRENT, id, row});
+    else await post('append', {sheet:CURRENT, row});
+    msg('บันทึกสำเร็จ');
+    clearForm();
+    await loadAdminData();
+  }catch(e){ msg(e.message,true); }
+}
+
+async function loadAdminData(){
+  try{
+    const json = await post('getAdminData');
+    ADMIN_DATA = json.data || {};
+    renderList();
+  }catch(e){ msg(e.message,true); document.getElementById('listArea').innerHTML='โหลดข้อมูลไม่สำเร็จ'; }
+}
+
+function renderList(){
+  const data = ADMIN_DATA[CURRENT] || [];
+  document.getElementById('listTitle').textContent = 'รายการ: ' + labelSheet(CURRENT);
+  if(!data.length){ document.getElementById('listArea').innerHTML = 'ยังไม่มีข้อมูล'; return; }
+  const schema = SCHEMAS[CURRENT];
+  const cols = ['status', ...schema.map(s=>s[0])];
+  document.getElementById('listArea').innerHTML = `
+  <div style="overflow:auto">
+  <table>
+    <thead><tr>${cols.map(c=>`<th>${labelField(c)}</th>`).join('')}<th>คำสั่ง</th></tr></thead>
+    <tbody>${data.map(item=>`
+      <tr>
+        ${cols.map(c=>cell(item,c)).join('')}
+        <td><div class="actions">
+          <button onclick='editItem(${JSON.stringify(item).replaceAll("'","&#39;")})'>แก้ไข</button>
+          <button class="${item.status==='hidden'?'success':'warn'}" onclick="toggleStatus('${item.id}','${item.status==='hidden'?'published':'hidden'}')">${item.status==='hidden'?'เผยแพร่':'ซ่อน'}</button>
+          <button class="danger" onclick="deleteItem('${item.id}')">ลบ</button>
+        </div></td>
+      </tr>`).join('')}
+    </tbody>
+  </table></div>`;
+}
+
+function cell(item,c){
+  const v = item[c] || '';
+  if(c==='status') return `<td><span class="pill ${v==='hidden'?'hidden-status':''}">${v || 'published'}</span></td>`;
+  if(c.includes('image') && v) return `<td><img src="${escapeAttr(v)}" onerror="this.style.display='none'"><br><small>${escapeHtml(v).slice(0,35)}...</small></td>`;
+  if(c.includes('url') && v) return `<td><a href="${escapeAttr(v)}" target="_blank">เปิดลิงก์</a></td>`;
+  return `<td>${escapeHtml(String(v)).slice(0,120)}</td>`;
+}
+
+function editItem(item){
+  window.scrollTo({top:0, behavior:'smooth'});
+  renderForm(item);
+}
+
+async function toggleStatus(id,status){
+  try{
+    await post('setStatus', {sheet:CURRENT, id, status});
+    msg(status==='hidden'?'ซ่อนรายการแล้ว':'เผยแพร่รายการแล้ว');
+    await loadAdminData();
+  }catch(e){ msg(e.message,true); }
+}
+
+async function deleteItem(id){
+  if(!confirm('ยืนยันลบรายการนี้ใช่ไหม? การลบแล้วจะหายจาก Google Sheet ด้วย')) return;
+  try{
+    await post('delete', {sheet:CURRENT, id});
+    msg('ลบสำเร็จ');
+    await loadAdminData();
+  }catch(e){ msg(e.message,true); }
+}
+
+function uploadSelectedFile(){ uploadFile(document.getElementById('fileInput').files[0]); }
+
+async function uploadFile(file){
+  if(!file) return;
+  try{
+    document.getElementById('uploadResult').textContent = 'กำลังอัปโหลด...';
+    const data = await fileToBase64(file);
+    const json = await post('upload', {file:{name:file.name, type:file.type, data}});
+    const url = file.type.startsWith('image/') ? json.image_url : json.view_url;
+    const target = file.type.startsWith('image/') ? (document.getElementById('f_image_url') ? 'f_image_url' : null) : (document.getElementById('f_file_url') ? 'f_file_url' : null);
+    if(target) document.getElementById(target).value = url;
+    if(file.type.startsWith('image/')){
+      const img = document.getElementById('filePreview');
+      img.src = url; img.style.display='block';
+    }
+    document.getElementById('uploadResult').innerHTML = `อัปโหลดสำเร็จ: <a href="${json.view_url}" target="_blank">เปิดไฟล์</a>`;
+  }catch(e){ document.getElementById('uploadResult').innerHTML = `<span style="color:red">${e.message}</span>`; }
+}
+
+function fileToBase64(file){
+  return new Promise((resolve,reject)=>{
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result).split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+const dz = document.getElementById('dropZone');
+dz.addEventListener('dragover', e=>{e.preventDefault(); dz.style.background='#eaf6ff';});
+dz.addEventListener('dragleave', e=>{dz.style.background='#f8fbff';});
+dz.addEventListener('drop', e=>{e.preventDefault(); dz.style.background='#f8fbff'; uploadFile(e.dataTransfer.files[0]);});
+
+function labelSheet(s){return ({news:'ข่าวสาร',notice:'ประกาศ',gallery:'กิจกรรม/รูปภาพ',download:'เอกสาร PDF',staff:'บุคลากร',services:'บริการ',service_schedule:'ตารางบริการ'})[s]||s}
+function labelField(c){return ({status:'สถานะ',date:'วันที่',title:'หัวข้อ',description:'รายละเอียด',image_url:'รูปภาพ',file_url:'ไฟล์',name:'ชื่อ',position:'ตำแหน่ง',phone:'โทร',icon:'ไอคอน',link:'ลิงก์',day:'วัน',service:'บริการ'})[c]||c}
+function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function escapeAttr(s){return escapeHtml(s).replaceAll('\n',' ')}
+
+if(TOKEN){
+  document.getElementById('loginPage').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+  renderForm();
+  loadAdminData();
+}
+</script>
+</body>
+</html>
