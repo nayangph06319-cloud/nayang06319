@@ -52,16 +52,16 @@
       <div><h1>ระบบหลังบ้าน รพ.สต.นายาง</h1><p>V10 Admin Full Control CMS</p></div>
     </div>
     <div class="actions">
-      <a class="btn ghost" href="index.html" target="_blank">เปิดหน้าเว็บ</a>
-      <button class="warn" onclick="loadAdminData()">รีเฟรชข้อมูล</button>
+      <a class="btn ghost" href="index.html" target="_blank">เปิดหน้าเว็บ</a><a class="btn ghost" href="setup.html">ตั้งค่าระบบ</a>
+      <button class="warn" onclick="loadAdminData()">รีเฟรชข้อมูล</button><button class="success" onclick="repairCurrentIds()">ซ่อม ID แถวเก่า</button><button class="primary" onclick="backupNow()">Backup Now</button>
       <button class="danger" onclick="logout()">ออกจากระบบ</button>
     </div>
   </div>
 </header>
 
 <main class="wrap">
-  <div class="tabs">
-    <button class="primary" onclick="showTab('news')">ข่าวสาร</button>
+  <div class="tabs"><button onclick="showTab('menu_groups')">จัดหมวดเมนู</button><button onclick="showTab('file_manager')">นำเข้าไฟล์</button><button onclick="showTab('site_footer')">Footer/ติดต่อ</button><button onclick="showTab('visitor_stats')">สถิติเข้าชม</button>
+    <button class="primary" onclick="showTab('menus')">เมนูหน้าเว็บ</button><button onclick="showTab('org_general')">ข้อมูลหน่วยงาน</button><button onclick="showTab('org_health_history')">ประวัติ รพ.สต.</button><button onclick="showTab('org_subdistrict_history')">ประวัติตำบล</button><button onclick="showTab('org_vision')">วิสัยทัศน์</button><button onclick="showTab('org_mission')">พันธกิจ</button><button onclick="showTab('org_values')">ค่านิยม</button><button onclick="showTab('org_structure')">โครงสร้างองค์กร</button><button onclick="showTab('org_map')">แผนที่</button><button onclick="showTab('org_contact')">ช่องทางติดต่อ</button><button onclick="showTab('hero_buttons')">ปุ่มหน้าแรก</button><button onclick="showTab('banners')">Banner Slide</button><button onclick="showTab('popups')">Popup</button><button onclick="showTab('kpi_dashboard')">Dashboard KPI</button><button onclick="showTab('appointments')">นัดหมาย</button><button onclick="showTab('complaints')">ร้องเรียน</button><button onclick="showTab('eservices')">E-Service</button><button onclick="showTab('users')">ผู้ใช้</button><button onclick="showTab('audit_log')">Log</button><button onclick="showTab('backup_log')">Backup Log</button><button onclick="showTab('quick_links')">เมนูลัด</button><button onclick="showTab('news')">ข่าวสาร</button><button onclick="showTab('vhv_directory')">ทำเนียบ อสม.</button><button onclick="showTab('appscript_apps')">AppScript</button><button onclick="showTab('videos')">YouTube/วิดีโอ</button>
     <button onclick="showTab('notice')">ประกาศ</button>
     <button onclick="showTab('gallery')">กิจกรรม/รูปภาพ</button>
     <button onclick="showTab('download')">เอกสาร PDF</button>
@@ -77,7 +77,7 @@
     <input type="hidden" id="currentSheet" value="news">
     <div id="dynamicForm" class="grid"></div>
     <div class="full drop" id="dropZone">
-      <b>ลากวางรูป/PDF ที่นี่ หรือกดเลือกไฟล์</b><br>
+      <b>ลากวางไฟล์ได้ทุกชนิดที่นี่: PDF / DOC / DOCX / XLS / XLSX / PPT / PPTX / ZIP / JPG / PNG / MP4</b><br>
       <small>ระบบจะอัปโหลดไป Google Drive และนำลิงก์มาใส่ช่องให้อัตโนมัติ</small><br><br>
       <input type="file" id="fileInput" onchange="uploadSelectedFile()">
       <img id="filePreview" class="preview">
@@ -104,6 +104,37 @@ let ADMIN_DATA = {};
 const API = (window.NAYANG_CMS && window.NAYANG_CMS.WEB_APP_URL) ? window.NAYANG_CMS.WEB_APP_URL : '';
 
 const SCHEMAS = {
+  menu_groups: [['group_name','หมวดเมนู','text'], ['label','ชื่อเมนูย่อย','text'], ['url','ลิงก์','text'], ['icon','ไอคอน','text'], ['order','ลำดับ','number']],
+  file_manager: [['title','ชื่อไฟล์','text'], ['description','รายละเอียด','textarea'], ['file_url','ลิงก์ไฟล์','text'], ['file_type','ชนิดไฟล์ PDF/DOC/XLS/PPT/ZIP','text'], ['category','หมวดหมู่','text'], ['download_count','จำนวนดาวน์โหลด','number'], ['order','ลำดับ','number']],
+  site_footer: [['title','ชื่อหน่วยงาน','text'], ['content','ที่อยู่/รายละเอียด','textarea'], ['phone','เบอร์โทร','text'], ['email','Email','text'], ['facebook_url','Facebook','text'], ['line_url','LINE OA','text'], ['map_url','แผนที่','text'], ['order','ลำดับ','number']],
+  visitor_stats: [['date','วันที่','date'], ['page','หน้าเว็บ','text'], ['count','จำนวนเข้าชม','number']],
+
+  org_general: [['title','หัวข้อ','text'], ['content','เนื้อหา','textarea'], ['image_url','ลิงก์รูปภาพ','text'], ['file_url','ลิงก์ไฟล์แนบ','text'], ['order','ลำดับ','number']],
+  org_health_history: [['title','หัวข้อ','text'], ['content','เนื้อหา','textarea'], ['image_url','ลิงก์รูปภาพ','text'], ['file_url','ลิงก์ไฟล์แนบ','text'], ['order','ลำดับ','number']],
+  org_subdistrict_history: [['title','หัวข้อ','text'], ['content','เนื้อหา','textarea'], ['image_url','ลิงก์รูปภาพ','text'], ['file_url','ลิงก์ไฟล์แนบ','text'], ['order','ลำดับ','number']],
+  org_vision: [['title','หัวข้อ','text'], ['content','เนื้อหา','textarea'], ['image_url','ลิงก์รูปภาพ','text'], ['file_url','ลิงก์ไฟล์แนบ','text'], ['order','ลำดับ','number']],
+  org_mission: [['title','หัวข้อ','text'], ['content','เนื้อหา','textarea'], ['image_url','ลิงก์รูปภาพ','text'], ['file_url','ลิงก์ไฟล์แนบ','text'], ['order','ลำดับ','number']],
+  org_values: [['title','หัวข้อ','text'], ['content','เนื้อหา','textarea'], ['image_url','ลิงก์รูปภาพ','text'], ['file_url','ลิงก์ไฟล์แนบ','text'], ['order','ลำดับ','number']],
+  org_structure: [['title','หัวข้อ','text'], ['content','เนื้อหา','textarea'], ['image_url','ลิงก์รูปภาพ/ผังโครงสร้าง','text'], ['file_url','ลิงก์ไฟล์แนบ','text'], ['order','ลำดับ','number']],
+  org_map: [['title','หัวข้อ','text'], ['content','รายละเอียด','textarea'], ['map_url','ลิงก์ Google Map','text'], ['image_url','ลิงก์ภาพแผนที่','text'], ['order','ลำดับ','number']],
+  org_contact: [['title','หัวข้อ','text'], ['content','รายละเอียด','textarea'], ['phone','เบอร์โทร','text'], ['email','Email','text'], ['line_url','LINE OA','text'], ['facebook_url','Facebook','text'], ['map_url','แผนที่','text'], ['order','ลำดับ','number']],
+
+  organization_profile: [['category','หมวดหมู่','text'], ['title','หัวข้อ','text'], ['content','เนื้อหา','textarea'], ['image_url','ลิงก์รูปภาพ','text'], ['file_url','ลิงก์ไฟล์แนบ','text'], ['map_url','ลิงก์แผนที่','text'], ['order','ลำดับ','number']],
+    banners: [['title','หัวข้อ Banner','text'], ['subtitle','คำอธิบาย','textarea'], ['image_url','รูป Desktop','text'], ['mobile_image_url','รูป Mobile','text'], ['button_text','ข้อความปุ่ม','text'], ['button_url','ลิงก์ปุ่ม','text'], ['start_date','วันเริ่มแสดง','date'], ['end_date','วันสิ้นสุด','date'], ['order','ลำดับ','number']],
+  popups: [['title','หัวข้อ Popup','text'], ['description','รายละเอียด','textarea'], ['image_url','รูปภาพ','text'], ['button_text','ข้อความปุ่ม','text'], ['button_url','ลิงก์ปุ่ม','text'], ['start_date','วันเริ่ม','date'], ['end_date','วันสิ้นสุด','date'], ['auto_close_seconds','ปิดอัตโนมัติ(วินาที)','number']],
+  kpi_dashboard: [['title','ชื่อ KPI','text'], ['value','ค่า','text'], ['unit','หน่วย','text'], ['icon','ไอคอน','text'], ['category','หมวดหมู่','text'], ['order','ลำดับ','number']],
+  appointments: [['date','วันที่บันทึก','date'], ['name','ชื่อผู้จอง','text'], ['phone','เบอร์โทร','text'], ['service','บริการ','text'], ['preferred_date','วันที่ต้องการรับบริการ','date'], ['message','รายละเอียด','textarea']],
+  complaints: [['date','วันที่รับเรื่อง','date'], ['name','ชื่อผู้ร้อง','text'], ['phone','เบอร์โทร','text'], ['topic','หัวข้อ','text'], ['detail','รายละเอียด','textarea'], ['tracking_no','เลขติดตาม','text'], ['reply','ผลตอบกลับ','textarea']],
+  eservices: [['title','ชื่อบริการ','text'], ['description','รายละเอียด','textarea'], ['form_url','ลิงก์ฟอร์ม','text'], ['file_url','ลิงก์ไฟล์','text'], ['category','หมวดหมู่','text'], ['order','ลำดับ','number']],
+  users: [['username','Username','text'], ['password','Password','text'], ['role','สิทธิ์ Admin/Editor/Viewer','text'], ['name','ชื่อผู้ใช้','text'], ['email','Email','text']],
+  audit_log: [['timestamp','เวลา','text'], ['user','ผู้ใช้','text'], ['action','การกระทำ','text'], ['sheet','ชีต','text'], ['detail','รายละเอียด','textarea']],
+  backup_log: [['timestamp','เวลา','text'], ['backup_name','ชื่อ Backup','text'], ['spreadsheet_url','ลิงก์สำรอง Sheet','text'], ['folder_url','ลิงก์โฟลเดอร์','text'], ['note','หมายเหตุ','textarea']],
+  menus: [['label','ชื่อเมนู','text'], ['url','ลิงก์ เช่น #staff','text'], ['order','ลำดับ','number']],
+  hero_buttons: [['label','ชื่อปุ่ม','text'], ['url','ลิงก์','text'], ['style','รูปแบบ primary / line / white','text'], ['order','ลำดับ','number']],
+  quick_links: [['icon','ไอคอน เช่น 📅','text'], ['title','ชื่อเมนูลัด','text'], ['subtitle','คำอธิบายสั้น','text'], ['url','ลิงก์','text'], ['order','ลำดับ','number']],
+  vhv_directory: [['village_no','หมู่ที่ 1-7','number'], ['village_name','ชื่อหมู่บ้าน','text'], ['name','ชื่อ-สกุล อสม.','text'], ['role','บทบาท เช่น ประธาน อสม./อสม.','text'], ['phone','เบอร์โทร','text'], ['image_url','ลิงก์รูปภาพ','text'], ['note','หมายเหตุ/พื้นที่รับผิดชอบ','textarea']],
+  appscript_apps: [['icon','ไอคอน เช่น 📱','text'], ['title','ชื่อระบบ AppScript','text'], ['description','รายละเอียด','textarea'], ['app_url','ลิงก์ AppScript/Web App','text'], ['manual_url','ลิงก์คู่มือ','text'], ['target_group','กลุ่มเป้าหมาย','text'], ['order','ลำดับ','number']],
+  videos: [['title','ชื่อวิดีโอ','text'], ['description','รายละเอียด','textarea'], ['youtube_url','ลิงก์ YouTube','text'], ['category','หมวดหมู่','text'], ['order','ลำดับ','number']],
   news: [
     ['date','วันที่','date'], ['title','หัวข้อข่าว','text'], ['description','รายละเอียด','textarea'], ['image_url','ลิงก์รูปภาพ','text']
   ],
@@ -187,7 +218,7 @@ function renderForm(item={}){
   if(item.status) document.getElementById('f_status').value = item.status;
 }
 
-function clearForm(){ renderForm(); document.getElementById('uploadResult').innerHTML=''; document.getElementById('filePreview').style.display='none'; }
+function clearForm(){ window.CURRENT_EDIT_ROW=''; renderForm(); document.getElementById('uploadResult').innerHTML=''; document.getElementById('filePreview').style.display='none'; }
 
 async function saveItem(){
   try{
@@ -196,7 +227,7 @@ async function saveItem(){
     schema.forEach(([key])=> row[key] = document.getElementById('f_'+key).value.trim());
     row.status = document.getElementById('f_status').value;
     const id = document.getElementById('editId').value;
-    if(id) await post('update', {sheet:CURRENT, id, row});
+    if(id) await post('update', {sheet:CURRENT, id, row, rowNumber: window.CURRENT_EDIT_ROW || ''});
     else await post('append', {sheet:CURRENT, row});
     msg('บันทึกสำเร็จ');
     clearForm();
@@ -227,8 +258,8 @@ function renderList(){
         ${cols.map(c=>cell(item,c)).join('')}
         <td><div class="actions">
           <button onclick='editItem(${JSON.stringify(item).replaceAll("'","&#39;")})'>แก้ไข</button>
-          <button class="${item.status==='hidden'?'success':'warn'}" onclick="toggleStatus('${item.id}','${item.status==='hidden'?'published':'hidden'}')">${item.status==='hidden'?'เผยแพร่':'ซ่อน'}</button>
-          <button class="danger" onclick="deleteItem('${item.id}')">ลบ</button>
+          <button class="${item.status==='hidden'?'success':'warn'}" onclick="toggleStatus('${item.id || ''}','${item.status==='hidden'?'published':'hidden'}','${item._rowNumber || ''}')">${item.status==='hidden'?'เผยแพร่':'ซ่อน'}</button>
+          <button class="danger" onclick="deleteItem('${item.id || ''}','${item._rowNumber || ''}')">ลบ</button>
         </div></td>
       </tr>`).join('')}
     </tbody>
@@ -244,22 +275,23 @@ function cell(item,c){
 }
 
 function editItem(item){
+  window.CURRENT_EDIT_ROW = item._rowNumber || '';
   window.scrollTo({top:0, behavior:'smooth'});
   renderForm(item);
 }
 
-async function toggleStatus(id,status){
+async function toggleStatus(id,status,rowNumber){
   try{
-    await post('setStatus', {sheet:CURRENT, id, status});
+    await post('setStatus', {sheet:CURRENT, id, status, rowNumber});
     msg(status==='hidden'?'ซ่อนรายการแล้ว':'เผยแพร่รายการแล้ว');
     await loadAdminData();
   }catch(e){ msg(e.message,true); }
 }
 
-async function deleteItem(id){
+async function deleteItem(id,rowNumber){
   if(!confirm('ยืนยันลบรายการนี้ใช่ไหม? การลบแล้วจะหายจาก Google Sheet ด้วย')) return;
   try{
-    await post('delete', {sheet:CURRENT, id});
+    await post('delete', {sheet:CURRENT, id, rowNumber});
     msg('ลบสำเร็จ');
     await loadAdminData();
   }catch(e){ msg(e.message,true); }
@@ -275,7 +307,7 @@ async function uploadFile(file){
     const json = await post('upload', {file:{name:file.name, type:file.type, data}});
     const url = file.type.startsWith('image/') ? json.image_url : json.view_url;
     const target = file.type.startsWith('image/') ? (document.getElementById('f_image_url') ? 'f_image_url' : null) : (document.getElementById('f_file_url') ? 'f_file_url' : null);
-    if(target) document.getElementById(target).value = url;
+    if(target) document.getElementById(target).value = url; if(document.getElementById('f_file_type')) document.getElementById('f_file_type').value=(file.name.split('.').pop()||'').toUpperCase();
     if(file.type.startsWith('image/')){
       const img = document.getElementById('filePreview');
       img.src = url; img.style.display='block';
@@ -284,6 +316,20 @@ async function uploadFile(file){
   }catch(e){ document.getElementById('uploadResult').innerHTML = `<span style="color:red">${e.message}</span>`; }
 }
 
+
+async function repairCurrentIds(){
+  if(!confirm('ซ่อม ID ให้ข้อมูลเก่าในแท็บนี้ใช่ไหม? ระบบจะเติม id และสถานะ published ให้แถวที่ยังไม่มี')) return;
+  try{
+    const res = await post('repairIds', {sheet:CURRENT});
+    msg('ซ่อม ID สำเร็จ จำนวน ' + (res.repaired || 0) + ' แถว');
+    await loadAdminData();
+  }catch(e){ msg(e.message,true); }
+}
+
+
+async function backupNow(){
+  try{const r=await post('backupNow',{});msg('สำรองข้อมูลสำเร็จ: '+(r.backup_name||'Backup'));await loadAdminData();}catch(e){msg(e.message,true);}
+}
 function fileToBase64(file){
   return new Promise((resolve,reject)=>{
     const reader = new FileReader();
@@ -298,8 +344,8 @@ dz.addEventListener('dragover', e=>{e.preventDefault(); dz.style.background='#ea
 dz.addEventListener('dragleave', e=>{dz.style.background='#f8fbff';});
 dz.addEventListener('drop', e=>{e.preventDefault(); dz.style.background='#f8fbff'; uploadFile(e.dataTransfer.files[0]);});
 
-function labelSheet(s){return ({news:'ข่าวสาร',notice:'ประกาศ',gallery:'กิจกรรม/รูปภาพ',download:'เอกสาร PDF',staff:'บุคลากร',services:'บริการ',service_schedule:'ตารางบริการ'})[s]||s}
-function labelField(c){return ({status:'สถานะ',date:'วันที่',title:'หัวข้อ',description:'รายละเอียด',image_url:'รูปภาพ',file_url:'ไฟล์',name:'ชื่อ',position:'ตำแหน่ง',phone:'โทร',icon:'ไอคอน',link:'ลิงก์',day:'วัน',service:'บริการ'})[c]||c}
+function labelSheet(s){return ({menu_groups:'จัดหมวดเมนู',file_manager:'นำเข้าไฟล์',site_footer:'Footer/ติดต่อ',visitor_stats:'สถิติเข้าชม',org_general:'ข้อมูลหน่วยงาน',org_health_history:'ประวัติ รพ.สต.',org_subdistrict_history:'ประวัติตำบล',org_vision:'วิสัยทัศน์',org_mission:'พันธกิจ',org_values:'ค่านิยม',org_structure:'โครงสร้างองค์กร',org_map:'แผนที่',org_contact:'ช่องทางติดต่อ',organization_profile:'ข้อมูลหน่วยงาน',banners:'Banner Slide',popups:'Popup',kpi_dashboard:'Dashboard KPI',appointments:'นัดหมาย',complaints:'ร้องเรียน',eservices:'E-Service',users:'ผู้ใช้',audit_log:'Log',backup_log:'Backup Log',menus:'เมนูหน้าเว็บ',hero_buttons:'ปุ่มหน้าแรก',quick_links:'เมนูลัด',vhv_directory:'ทำเนียบ อสม.',appscript_apps:'AppScript เพื่อประชาชน',videos:'YouTube/วิดีโอ',news:'ข่าวสาร',notice:'ประกาศ',gallery:'กิจกรรม/รูปภาพ',download:'เอกสาร PDF',staff:'บุคลากร',services:'บริการ',service_schedule:'ตารางบริการ'})[s]||s}
+function labelField(c){return ({group_name:'หมวดเมนู',file_type:'ชนิดไฟล์',download_count:'จำนวนดาวน์โหลด',facebook_url:'Facebook',line_url:'LINE OA',content:'เนื้อหา',map_url:'ลิงก์แผนที่',phone:'เบอร์โทร',line_url:'LINE OA',facebook_url:'Facebook',category:'หมวดหมู่',content:'เนื้อหา',map_url:'ลิงก์แผนที่',start_date:'วันเริ่ม',end_date:'วันสิ้นสุด',button_text:'ข้อความปุ่ม',button_url:'ลิงก์ปุ่ม',mobile_image_url:'รูป Mobile',preferred_date:'วันที่ต้องการ',tracking_no:'เลขติดตาม',reply:'ผลตอบกลับ',form_url:'ลิงก์ฟอร์ม',value:'ค่า',unit:'หน่วย',username:'Username',password:'Password',role:'สิทธิ์',timestamp:'เวลา',action:'การกระทำ',sheet:'ชีต',detail:'รายละเอียด',label:'ชื่อเมนู/ปุ่ม',url:'ลิงก์',order:'ลำดับ',subtitle:'คำอธิบายสั้น',village_no:'หมู่ที่',village_name:'ชื่อหมู่บ้าน',role:'บทบาท',app_url:'ลิงก์ AppScript',manual_url:'คู่มือ',youtube_url:'ลิงก์ YouTube',category:'หมวดหมู่',target_group:'กลุ่มเป้าหมาย',status:'สถานะ',date:'วันที่',title:'หัวข้อ',description:'รายละเอียด',image_url:'รูปภาพ',file_url:'ไฟล์',name:'ชื่อ',position:'ตำแหน่ง',phone:'โทร',icon:'ไอคอน',link:'ลิงก์',day:'วัน',service:'บริการ'})[c]||c}
 function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
 function escapeAttr(s){return escapeHtml(s).replaceAll('\n',' ')}
 
